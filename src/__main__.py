@@ -83,7 +83,7 @@ def main():
         elif args.command == 'version':
             from .version import __version__
             print(f"lora-mote-emulator version: {__version__}")
-        else: 
+        else:
             gateway, udp_client = init_gateway(args)
             if args.command == 'pull':
                 gateway.pull(udp_client)
@@ -107,7 +107,14 @@ def main():
                         fopts = bytes.fromhex(args.fopts) if args.fopts else b''
                         fport = getattr(args, "fport", None)
                         fport = fport if fport is not None else random.randint(1, 223)
-                        msg = args.msg.encode()
+                        # msg = args.msg.encode()
+                        data = json.loads(args.msg)
+                        vx = int(round(data['vx'] * 2 ** 8)).to_bytes(2, 'little')
+                        vy = int(round(data['vy'] * 2 ** 8)).to_bytes(2, 'little')
+                        vz = int(round(data['vz'] * 2 ** 8)).to_bytes(2, 'little')
+                        t =  int(round(data['t'] * 2 ** 4)).to_bytes(2, 'little')
+                        fl = int(data['flags']).to_bytes(1, 'little')
+                        msg = vx+vy+vz+t+fl
                         phypld = mote.form_phypld(fport, msg, fopts, unconfirmed=args.unconfirmed, ack=args.ack)
                     elif args.command == 'mac':
                         fport = 0
